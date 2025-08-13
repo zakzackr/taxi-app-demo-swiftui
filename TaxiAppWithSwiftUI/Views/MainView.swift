@@ -33,8 +33,8 @@ extension MainView {
         VStack {
             // Starting Point
             HStack(spacing: 12) {
-                Circle()
-                    .frame(width: 30, height: 30)
+                Image(systemName: "figure.wave")
+                    .imageScale(.large)
                 
                 VStack(alignment: .leading) {
                     HStack {
@@ -58,8 +58,19 @@ extension MainView {
             Spacer()
             
             // Button
-            Capsule()
-                .frame(height: 60)
+            Button {
+                print("ボタンがクリックされました")
+            } label: {
+                Text("目的地を指定する")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .background(.black)
+                    .clipShape(.capsule)
+
+            }
+
         }
         .padding(.horizontal)
         .frame(height: 240)

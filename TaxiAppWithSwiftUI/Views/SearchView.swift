@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct SearchView: View {
+    
+    @State private var searchText = ""
+    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
@@ -30,9 +33,12 @@ struct SearchView: View {
 extension SearchView {
     private var inputField: some View {
         
-        Capsule()
-            .frame(height: 70)
+        TextField("場所を入力...", text: $searchText)
             .padding()
+            .background(Color(uiColor: .secondarySystemBackground))
+            .clipShape(.capsule)
+            .padding()
+        
     }
     
     private var searchResult: some View {
