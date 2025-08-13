@@ -50,14 +50,45 @@ extension SearchView {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 ForEach(0 ..< 10) { _ in
-                    RoundedRectangle(cornerRadius: 18)
-                        .frame(height: 70)
+                    searchResultRow
                 }
                 
             }
             .padding()
         }
         .background(Color(uiColor: .secondarySystemBackground))
+    }
+    
+    private var searchResultRow: some View {
+        HStack(spacing: 12) {
+            // Icon
+            Image(systemName: "mappin.circle.fill")
+                .resizable()
+                .frame(width: 28, height: 28)
+                .foregroundColor(.black)
+
+            // Text
+            VStack(alignment: .leading) {
+                Text("Kアリーナ")
+                    .fontWeight(.bold)
+                    .foregroundStyle(.black)
+                Text("横浜市西区みなとみらい1-1")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+            
+            Spacer()
+            
+            // Icon
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.black)
+            
+            
+            
+        }
+        .padding()
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 
