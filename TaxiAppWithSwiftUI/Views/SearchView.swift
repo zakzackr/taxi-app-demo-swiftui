@@ -2,7 +2,7 @@
 //  SearchView.swift
 //  TaxiAppWithSwiftUI
 //
-//  Created by Ryuichi Kozaki on 2025/08/13.
+//  Created on 2025/08/13.
 //
 
 import SwiftUI
@@ -81,7 +81,7 @@ extension SearchView {
                 Image(systemName: "mappin.circle.fill")
                     .resizable()
                     .frame(width: 28, height: 28)
-                    .foregroundColor(.black)
+                    .foregroundColor(.main)
 
                 // Text
                 VStack(alignment: .leading) {
@@ -97,7 +97,7 @@ extension SearchView {
                 
                 // Icon
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.main)
                 
                 
                 

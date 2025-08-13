@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct MainView: View {
     @State private var showSearchView = false
@@ -30,7 +31,8 @@ struct MainView: View {
 extension MainView {
     
     private var map: some View {
-        Color.gray
+        Map {
+        }
     }
     
     private var information: some View {
@@ -39,6 +41,7 @@ extension MainView {
             HStack(spacing: 12) {
                 Image(systemName: "figure.wave")
                     .imageScale(.large)
+                    .foregroundStyle(.main)
                 
                 VStack(alignment: .leading) {
                     HStack {
@@ -58,6 +61,16 @@ extension MainView {
             
             // Destination
             Destination()
+                .overlay(alignment: .topLeading) {
+                    VStack {
+                        Image(systemName: "arrowtriangle.down.fill")
+                        Image(systemName: "arrowtriangle.down.fill").opacity(0.66)
+                        Image(systemName: "arrowtriangle.down.fill").opacity(0.33)
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.main)
+                    .offset(x: 8, y: -16)
+                }
             
             Spacer()
             
@@ -66,13 +79,7 @@ extension MainView {
                 showSearchView.toggle()
             } label: {
                 Text("目的地を指定する")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .background(.black)
-                    .clipShape(.capsule)
-
+                    .modifier(BasicButton())
             }
 
         }

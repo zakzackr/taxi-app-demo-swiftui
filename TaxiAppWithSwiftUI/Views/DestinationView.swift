@@ -2,7 +2,7 @@
 //  DestinationView.swift
 //  TaxiAppWithSwiftUI
 //
-//  Created by Ryuichi Kozaki on 2025/08/13.
+//  Created on 2025/08/13.
 //
 
 import SwiftUI
@@ -67,12 +67,7 @@ extension DestinationView {
                 print("ボタンがタップされました")
             } label: {
                 Text("ここに行く")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .background(.black)
-                    .clipShape(.capsule)
+                    .modifier(BasicButton())
             }
 
         }

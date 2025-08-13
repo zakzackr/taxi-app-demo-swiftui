@@ -2,7 +2,7 @@
 //  TaxiAppWithSwiftUIApp.swift
 //  TaxiAppWithSwiftUI
 //
-//  Created by Ryuichi Kozaki on 2025/08/13.
+//  Created on 2025/08/13.
 //
 
 import SwiftUI
