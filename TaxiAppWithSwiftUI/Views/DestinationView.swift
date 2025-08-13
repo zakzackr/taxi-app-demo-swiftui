@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct DestinationView: View {
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         VStack {
             // Map Area
@@ -17,6 +19,22 @@ struct DestinationView: View {
             information
             
         }
+        .navigationTitle("地点を確認・調整")
+        .navigationBarBackButtonHidden()
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                }
+                .foregroundStyle(.black)
+
+            }
+        }
+
     }
 }
 

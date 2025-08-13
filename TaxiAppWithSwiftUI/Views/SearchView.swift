@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SearchView: View {
     
+    @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
     
     var body: some View {
@@ -23,6 +24,16 @@ struct SearchView: View {
                 
                 // Result
                 searchResult
+            }
+            .navigationTitle("目的地を検索")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("キャンセル") {
+                        dismiss()
+                    }
+                    .foregroundStyle(.black)
+                }
             }
         }
     }
