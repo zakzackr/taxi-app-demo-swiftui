@@ -12,16 +12,18 @@ struct SearchView: View {
     @State private var searchText = ""
     
     var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-            
-            // Input filed
-            inputField
-            
-            Divider()
-            
-            // Result
-            searchResult
+        NavigationStack{
+            VStack(spacing: 0) {
+                Divider()
+                
+                // Input filed
+                inputField
+                
+                Divider()
+                
+                // Result
+                searchResult
+            }
         }
     }
 }
@@ -60,35 +62,39 @@ extension SearchView {
     }
     
     private var searchResultRow: some View {
-        HStack(spacing: 12) {
-            // Icon
-            Image(systemName: "mappin.circle.fill")
-                .resizable()
-                .frame(width: 28, height: 28)
-                .foregroundColor(.black)
+        NavigationLink {
+            DestinationView()
+        } label: {
+            HStack(spacing: 12) {
+                // Icon
+                Image(systemName: "mappin.circle.fill")
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .foregroundColor(.black)
 
-            // Text
-            VStack(alignment: .leading) {
-                Text("Kアリーナ")
-                    .fontWeight(.bold)
+                // Text
+                VStack(alignment: .leading) {
+                    Text("Kアリーナ")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.black)
+                    Text("横浜市西区みなとみらい1-1")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                }
+                
+                Spacer()
+                
+                // Icon
+                Image(systemName: "chevron.right")
                     .foregroundStyle(.black)
-                Text("横浜市西区みなとみらい1-1")
-                    .font(.caption)
-                    .foregroundStyle(.gray)
+                
+                
+                
             }
-            
-            Spacer()
-            
-            // Icon
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.black)
-            
-            
-            
+            .padding()
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .padding()
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 
