@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct SearchView: View {
     
+    @ObservedObject var searchViewModel = SearchViewModel()
+    
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
+    let center: CLLocationCoordinate2D?
     
     var body: some View {
         NavigationStack{
@@ -40,7 +44,7 @@ struct SearchView: View {
 }
 
 #Preview {
-    SearchView()
+    SearchView(center: .init(CLLocationCoordinate2D(latitude: 35.452183, longitude: 139.632419)))
 }
 
 extension SearchView {
@@ -51,6 +55,12 @@ extension SearchView {
             .background(Color(uiColor: .secondarySystemBackground))
             .clipShape(.capsule)
             .padding()
+            .onSubmit {
+                guard !searchText.isEmpty, let center else { return }
+                Task {
+                    await searchViewModel.searchPlace(searchText: searchText, center: center, meters: 1000)
+                }
+            }
         
     }
     
@@ -62,8 +72,8 @@ extension SearchView {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                ForEach(0 ..< 10) { _ in
-                    searchResultRow
+                ForEach(searchViewModel.searchResults, id: \.self) { mapItem in
+                    searchResultRow(mapItem: mapItem)
                 }
                 
             }
@@ -72,7 +82,7 @@ extension SearchView {
         .background(Color(uiColor: .secondarySystemBackground))
     }
     
-    private var searchResultRow: some View {
+    private func searchResultRow(mapItem: MKMapItem) -> some View {
         NavigationLink {
             DestinationView()
         } label: {
@@ -85,22 +95,20 @@ extension SearchView {
 
                 // Text
                 VStack(alignment: .leading) {
-                    Text("Kアリーナ")
+                    Text(mapItem.name ?? "")
                         .fontWeight(.bold)
                         .foregroundStyle(.black)
-                    Text("横浜市西区みなとみらい1-1")
+                    Text(searchViewModel.getAddressString(placemark: mapItem.placemark))
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
+                .multilineTextAlignment(.leading)
                 
                 Spacer()
                 
                 // Icon
                 Image(systemName: "chevron.right")
                     .foregroundStyle(.main)
-                
-                
-                
             }
             .padding()
             .background(.white)

@@ -10,6 +10,9 @@ import MapKit
 import CoreLocation
 
 struct MainView: View {
+    
+    @ObservedObject var mainViewModel = MainViewModel()
+    
     @State private var showSearchView = false
 //    @State private var cameraPosition: MapCameraPosition = .region(
 //        MKCoordinateRegion(
@@ -30,7 +33,9 @@ struct MainView: View {
             information  
         }
         .sheet(isPresented: $showSearchView) {
-            SearchView()
+            mainViewModel.userState = .setRidePoint
+        } content: {
+            SearchView(center: mainViewModel.ridePointCoordinates)
         }
     }
 }
@@ -45,8 +50,19 @@ extension MainView {
         Map(position: $cameraPosition) {
             UserAnnotation()
         }
+        .overlay{
+            CenterPin()
+        }
         .onAppear{
             CLLocationManager().requestWhenInUseAuthorization()
+        }
+        .onMapCameraChange(frequency: .onEnd) { context in
+            if mainViewModel.userState == .setRidePoint {
+                let center = context.region.center
+                Task {
+                    await mainViewModel.getLocationAddress(latitude: center.latitude, longitude: center.longitude)
+                }
+            }
         }
     }
     
@@ -67,7 +83,7 @@ extension MainView {
                             .foregroundStyle(.gray)
                     }
                     
-                    Text("横浜市西区みなとみらい1-1")
+                    Text(mainViewModel.ridePointName)
                         .font(.headline)
                 }
                 
@@ -91,6 +107,7 @@ extension MainView {
             
             // Button
             Button {
+                mainViewModel.userState = .searchLocation
                 showSearchView.toggle()
             } label: {
                 Text("目的地を指定する")
