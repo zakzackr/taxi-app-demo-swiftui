@@ -84,7 +84,7 @@ extension SearchView {
     
     private func searchResultRow(mapItem: MKMapItem) -> some View {
         NavigationLink {
-            DestinationView()
+            DestinationView(placemark: mapItem.placemark)
         } label: {
             HStack(spacing: 12) {
                 // Icon

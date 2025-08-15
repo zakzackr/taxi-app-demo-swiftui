@@ -6,9 +6,14 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct DestinationView: View {
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Environment(\.dismiss) var dismiss
+    @State private var cameraPosition: MapCameraPosition = .automatic
+    
+    let placemark: MKPlacemark
     
     var body: some View {
         VStack {
@@ -31,7 +36,6 @@ struct DestinationView: View {
                         .font(.headline)
                 }
                 .foregroundStyle(.black)
-
             }
         }
 
@@ -39,12 +43,24 @@ struct DestinationView: View {
 }
 
 #Preview {
-    DestinationView()
+    DestinationView(placemark: .init(coordinate: .init(latitude: 35.452183, longitude: 139.632419))
+    )
+    .environmentObject(MainViewModel())
 }
 
 extension DestinationView {
     private var map: some View {
-        Color.gray
+        Map(position: $cameraPosition){
+        }
+        .onAppear {
+            cameraPosition = .camera(MapCamera(centerCoordinate: placemark.coordinate, distance: 1000))
+        }
+        .onMapCameraChange(frequency: .onEnd) { context in
+            let center = context.region.center
+            Task {
+                await mainViewModel.setDestination(latitude: center.latitude, longitude: center.longitude)
+            }
+        }
     }
     
     private var information: some View {
@@ -60,11 +76,14 @@ extension DestinationView {
             }
             
             // Destination
-            Destination()
+            Destination(address: mainViewModel.destinationAddress)
                             
             // Button
             Button {
-                print("ボタンがタップされました")
+                mainViewModel.showSearchView = false
+                Task {
+                    await mainViewModel.fetchRoute()
+                }
             } label: {
                 Text("ここに行く")
                     .modifier(BasicButton())

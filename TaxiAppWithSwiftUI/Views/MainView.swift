@@ -12,18 +12,7 @@ import CoreLocation
 struct MainView: View {
     
     @ObservedObject var mainViewModel = MainViewModel()
-    
-    @State private var showSearchView = false
-//    @State private var cameraPosition: MapCameraPosition = .region(
-//        MKCoordinateRegion(
-//            center: .init(latitude: 35.452183, longitude: 139.632419),
-//            latitudinalMeters: 10000,
-//            longitudinalMeters: 10000
-//        )
-//    )
-    
-    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
-    
+        
     var body: some View {
         VStack {
             // Map Area
@@ -32,10 +21,11 @@ struct MainView: View {
             // Information Area
             information  
         }
-        .sheet(isPresented: $showSearchView) {
+        .sheet(isPresented: $mainViewModel.showSearchView) {
             mainViewModel.userState = .setRidePoint
         } content: {
             SearchView(center: mainViewModel.ridePointCoordinates)
+                .environmentObject(mainViewModel)
         }
     }
 }
@@ -47,8 +37,13 @@ struct MainView: View {
 extension MainView {
     
     private var map: some View {
-        Map(position: $cameraPosition) {
+        Map(position: $mainViewModel.mainCamera) {
             UserAnnotation()
+            
+            if let polyline = mainViewModel.route?.polyline {
+                MapPolyline(polyline)
+                    .stroke(.blue, lineWidth: 7)
+            }
         }
         .overlay{
             CenterPin()
@@ -60,7 +55,7 @@ extension MainView {
             if mainViewModel.userState == .setRidePoint {
                 let center = context.region.center
                 Task {
-                    await mainViewModel.getLocationAddress(latitude: center.latitude, longitude: center.longitude)
+                    await mainViewModel.setRideLocation(latitude: center.latitude, longitude: center.longitude)
                 }
             }
         }
@@ -83,7 +78,7 @@ extension MainView {
                             .foregroundStyle(.gray)
                     }
                     
-                    Text(mainViewModel.ridePointName)
+                    Text(mainViewModel.ridePointAddress)
                         .font(.headline)
                 }
                 
@@ -91,7 +86,7 @@ extension MainView {
             }.padding(.vertical)
             
             // Destination
-            Destination()
+            Destination(address: "設定してください")
                 .overlay(alignment: .topLeading) {
                     VStack {
                         Image(systemName: "arrowtriangle.down.fill")
@@ -108,7 +103,7 @@ extension MainView {
             // Button
             Button {
                 mainViewModel.userState = .searchLocation
-                showSearchView.toggle()
+                mainViewModel.showSearchView.toggle()
             } label: {
                 Text("目的地を指定する")
                     .modifier(BasicButton())
