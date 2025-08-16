@@ -11,7 +11,7 @@ import CoreLocation
 
 struct MainView: View {
     
-    @ObservedObject var mainViewModel = MainViewModel()
+    @StateObject var mainViewModel = MainViewModel()
         
     var body: some View {
         VStack {
@@ -22,7 +22,9 @@ struct MainView: View {
             information  
         }
         .sheet(isPresented: $mainViewModel.showSearchView) {
-            mainViewModel.userState = .setRidePoint
+            if mainViewModel.userState != .confirmed {
+                mainViewModel.userState = .setRidePoint
+            }
         } content: {
             SearchView(center: mainViewModel.ridePointCoordinates)
                 .environmentObject(mainViewModel)
@@ -38,15 +40,26 @@ extension MainView {
     
     private var map: some View {
         Map(position: $mainViewModel.mainCamera) {
+            // User's current location
             UserAnnotation()
             
+            // Ride Point and Destination
+            if let ridePoint = mainViewModel.ridePointCoordinates,
+               let destination = mainViewModel.destinationCoordinates{
+                Marker("乗車地", coordinate: ridePoint).tint(.blue)
+                Marker("目的地", coordinate: destination).tint(.blue)
+            }
+            
+            // Route polyline
             if let polyline = mainViewModel.route?.polyline {
                 MapPolyline(polyline)
                     .stroke(.blue, lineWidth: 7)
             }
         }
         .overlay{
-            CenterPin()
+            if mainViewModel.userState == .setRidePoint {
+                CenterPin()
+            }
         }
         .onAppear{
             CLLocationManager().requestWhenInUseAuthorization()
@@ -86,7 +99,7 @@ extension MainView {
             }.padding(.vertical)
             
             // Destination
-            Destination(address: "設定してください")
+            Destination(address: mainViewModel.destinationAddress.isEmpty ? nil : mainViewModel.destinationAddress)
                 .overlay(alignment: .topLeading) {
                     VStack {
                         Image(systemName: "arrowtriangle.down.fill")
@@ -101,14 +114,34 @@ extension MainView {
             Spacer()
             
             // Button
-            Button {
-                mainViewModel.userState = .searchLocation
-                mainViewModel.showSearchView.toggle()
-            } label: {
-                Text("目的地を指定する")
-                    .modifier(BasicButton())
+            if mainViewModel.userState == .confirmed {
+                HStack(spacing: 16) {
+                    Button {
+                        mainViewModel.reset()
+                    }
+                    label: {
+                        Text("キャンセル")
+                            .modifier(BasicButton(isPrimary: false))
+                    }
+                    
+                    Button {
+                        
+                    }
+                    label: {
+                        Text("タクシーを呼ぶ")
+                            .modifier(BasicButton(isPrimary: true))
+                    }
+                }
+                
+            } else {
+                Button {
+                    mainViewModel.userState = .searchLocation
+                    mainViewModel.showSearchView.toggle()
+                } label: {
+                    Text("目的地を指定する")
+                        .modifier(BasicButton(isPrimary: true))
+                }
             }
-
         }
         .padding(.horizontal)
         .frame(height: 240)

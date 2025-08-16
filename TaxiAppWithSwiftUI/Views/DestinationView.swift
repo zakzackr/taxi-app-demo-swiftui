@@ -52,7 +52,11 @@ extension DestinationView {
     private var map: some View {
         Map(position: $cameraPosition){
         }
+        .overlay{
+            CenterPin()
+        }
         .onAppear {
+            mainViewModel.userState = .setDestination
             cameraPosition = .camera(MapCamera(centerCoordinate: placemark.coordinate, distance: 1000))
         }
         .onMapCameraChange(frequency: .onEnd) { context in
@@ -80,6 +84,7 @@ extension DestinationView {
                             
             // Button
             Button {
+                mainViewModel.userState = .confirmed
                 mainViewModel.showSearchView = false
                 Task {
                     await mainViewModel.fetchRoute()

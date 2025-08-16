@@ -13,6 +13,8 @@ import SwiftUI
 enum UserState {
     case setRidePoint
     case searchLocation
+    case setDestination
+    case confirmed
 }
 
 class MainViewModel: ObservableObject {
@@ -98,5 +100,15 @@ class MainViewModel: ObservableObject {
         rect.origin.y -= paddingHeight / 2
         
         mainCamera = .rect(rect)
+    }
+    
+    func reset() {
+        userState = .setRidePoint
+        ridePointAddress = ""
+        ridePointCoordinates = nil
+        destinationAddress = ""
+        destinationCoordinates = nil
+        route = nil
+        mainCamera = .userLocation(fallback: .automatic)
     }
 }
