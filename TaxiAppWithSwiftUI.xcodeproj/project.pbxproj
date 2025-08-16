@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		925E401D2E5065D4009598B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 925E401C2E5065D4009598B5 /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		925E3FD22E4C539A009598B5 /* TaxiAppWithSwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TaxiAppWithSwiftUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				925E401D2E5065D4009598B5 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = TaxiAppWithSwiftUI;
 			packageProductDependencies = (
+				925E401C2E5065D4009598B5 /* FirebaseFirestore */,
 			);
 			productName = TaxiAppWithSwiftUI;
 			productReference = 925E3FD22E4C539A009598B5 /* TaxiAppWithSwiftUI.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 925E3FC92E4C539A009598B5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				925E401B2E5065D4009598B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 925E3FD32E4C539A009598B5 /* Products */;
 			projectDirPath = "";
@@ -337,6 +346,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		925E401B2E5065D4009598B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		925E401C2E5065D4009598B5 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 925E401B2E5065D4009598B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 925E3FCA2E4C539A009598B5 /* Project object */;
 }

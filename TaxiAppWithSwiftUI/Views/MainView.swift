@@ -70,6 +70,7 @@ extension MainView {
         }
         .onAppear{
             CLLocationManager().requestWhenInUseAuthorization()
+            mainViewModel.startTaxisListening()
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             if mainViewModel.currentUser.state == .setRidePoint {

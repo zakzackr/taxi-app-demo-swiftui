@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 import MapKit
 import SwiftUI
+import FirebaseFirestore
 
 class MainViewModel: ObservableObject {
     @Published var currentUser = User.mock
@@ -24,7 +25,7 @@ class MainViewModel: ObservableObject {
     @Published var mainCamera: MapCameraPosition = .userLocation(fallback: .automatic)
     @Published var route: MKRoute?
     
-    @Published var taxis: [Taxi] = Taxi.mocks
+    @Published var taxis: [Taxi] = []
     
     @MainActor
     func setRideLocation(coordinates: CLLocationCoordinate2D) async {
@@ -57,6 +58,48 @@ class MainViewModel: ObservableObject {
         }
     }
     
+    func startTaxisListening() {
+        let firestore = Firestore.firestore()
+        
+        firestore.collection("taxis")
+            .addSnapshotListener { querySnapshot, error in
+                if let error = error {
+                    print("リスナーの取得に失敗しました: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let snapshot = querySnapshot else {
+                    print("リスナーにデータ無し")
+                    return
+                }
+                
+
+                snapshot.documentChanges.forEach { diff in
+                    
+                    do {
+                        let taxi = try diff.document.data(as: Taxi.self)
+                        
+                        switch diff.type {
+                        case .added:
+                            print("DEBUG: 追加")
+                            self.taxis.append(taxi)
+                        case .removed:
+                            print("DEBUG: 削除")
+                            self.taxis.removeAll(where: { $0.id == taxi.id })
+                        case .modified:
+                            print("DEBUG: 更新")
+                            if let index = self.taxis.firstIndex(where: { $0.id == taxi.id }) {
+                                self.taxis[index] = taxi
+                            }
+                        }
+                        
+                    } catch {
+                        print("Taxiデータ変換に失敗しました: \(error.localizedDescription)")
+                    }
+                }
+            }
+    }
+    
     private func changeCameraPosition() {
         
         switch currentUser.state {
@@ -76,6 +119,22 @@ class MainViewModel: ObservableObject {
             mainCamera = .userLocation(fallback: .automatic)
         }
     }
+    
+//    @MainActor
+//    func fetchTaxis() async {
+//        let firestore = Firestore.firestore()
+//        
+//        do {
+//            let snapshot = try await firestore.collection("taxis").getDocuments()
+//            
+//            for document in snapshot.documents {
+//                let taxi = try document.data(as: Taxi.self)
+//                taxis.append(taxi)
+//            }
+//        } catch {
+//            print("Taxiデータの取得に失敗しました：\(error.localizedDescription)")
+//        }
+//    }
     
     func reset() {
         currentUser.state = .setRidePoint
