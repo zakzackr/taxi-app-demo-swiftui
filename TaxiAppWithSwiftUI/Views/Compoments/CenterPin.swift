@@ -13,22 +13,22 @@ struct CenterPin: View {
             Image(systemName: "mappin")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 40)
+                .frame(height: Constants.pinHeight)
             
             Image(systemName: "circle.fill")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 24)
+                .frame(height: Constants.pinHeight * 0.6)
                 .offset(y: -4)
             
             Image(systemName: "circle.fill")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 8)
-                .offset(y: 4)
+                .frame(height: Constants.pinHeight * 0.2)
+                .offset(y: Constants.pinHeight * 0.1)
                 .foregroundStyle(.white)
         }
-        .offset(y: -20)
+        .offset(y: -Constants.pinHeight / 2)
         .foregroundStyle(.main)
     }
 }

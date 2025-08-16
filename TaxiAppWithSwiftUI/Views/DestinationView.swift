@@ -43,7 +43,7 @@ struct DestinationView: View {
 }
 
 #Preview {
-    DestinationView(placemark: .init(coordinate: .init(latitude: 35.452183, longitude: 139.632419))
+    DestinationView(placemark: .init(coordinate: Constants.sampleCoordinates)
     )
     .environmentObject(MainViewModel())
 }
@@ -57,12 +57,11 @@ extension DestinationView {
         }
         .onAppear {
             mainViewModel.userState = .setDestination
-            cameraPosition = .camera(MapCamera(centerCoordinate: placemark.coordinate, distance: 1000))
+            cameraPosition = .camera(MapCamera(centerCoordinate: placemark.coordinate, distance: Constants.cameraDistance))
         }
         .onMapCameraChange(frequency: .onEnd) { context in
-            let center = context.region.center
             Task {
-                await mainViewModel.setDestination(latitude: center.latitude, longitude: center.longitude)
+                await mainViewModel.setDestination(coordinates: context.region.center)
             }
         }
     }

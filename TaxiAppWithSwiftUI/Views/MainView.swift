@@ -26,7 +26,7 @@ struct MainView: View {
                 mainViewModel.userState = .setRidePoint
             }
         } content: {
-            SearchView(center: mainViewModel.ridePointCoordinates)
+            SearchView()
                 .environmentObject(mainViewModel)
         }
     }
@@ -66,9 +66,8 @@ extension MainView {
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             if mainViewModel.userState == .setRidePoint {
-                let center = context.region.center
                 Task {
-                    await mainViewModel.setRideLocation(latitude: center.latitude, longitude: center.longitude)
+                    await mainViewModel.setRideLocation(coordinates: context.region.center)
                 }
             }
         }
@@ -91,7 +90,7 @@ extension MainView {
                             .foregroundStyle(.gray)
                     }
                     
-                    Text(mainViewModel.ridePointAddress)
+                    Text(mainViewModel.ridePointAddress ?? "")
                         .font(.headline)
                 }
                 
@@ -99,17 +98,8 @@ extension MainView {
             }.padding(.vertical)
             
             // Destination
-            Destination(address: mainViewModel.destinationAddress.isEmpty ? nil : mainViewModel.destinationAddress)
-                .overlay(alignment: .topLeading) {
-                    VStack {
-                        Image(systemName: "arrowtriangle.down.fill")
-                        Image(systemName: "arrowtriangle.down.fill").opacity(0.66)
-                        Image(systemName: "arrowtriangle.down.fill").opacity(0.33)
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.main)
-                    .offset(x: 8, y: -16)
-                }
+            Destination(address: mainViewModel.destinationAddress)
+                .threeTriangles(x: 8, y: -16)
             
             Spacer()
             
@@ -144,6 +134,6 @@ extension MainView {
             }
         }
         .padding(.horizontal)
-        .frame(height: 240)
+        .frame(height: Constants.informationAreaHeight)
     }
 }

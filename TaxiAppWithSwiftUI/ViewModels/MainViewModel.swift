@@ -23,49 +23,25 @@ class MainViewModel: ObservableObject {
     
     @Published var showSearchView = false
 
-    @Published var ridePointAddress = ""
+    @Published var ridePointAddress: String?
     var ridePointCoordinates: CLLocationCoordinate2D?
     
-    @Published var destinationAddress = ""
+    @Published var destinationAddress: String?
     var destinationCoordinates: CLLocationCoordinate2D?
     
     @Published var mainCamera: MapCameraPosition = .userLocation(fallback: .automatic)
     @Published var route: MKRoute?
     
     @MainActor
-    func setRideLocation(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        ridePointCoordinates = location.coordinate
-        ridePointAddress = await getLocationAddress(location: location)
+    func setRideLocation(coordinates: CLLocationCoordinate2D) async {
+        ridePointCoordinates = coordinates
+        ridePointAddress = await coordinates.getLocationAddress()
     }
     
     @MainActor
-    func setDestination(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        destinationCoordinates = location.coordinate
-        destinationAddress = await getLocationAddress(location: location)
-    }
-    
-    func getLocationAddress(location: CLLocation) async -> String {
-        let geoCoder = CLGeocoder()
-                
-        do {
-            let placemarks = try await geoCoder.reverseGeocodeLocation(location)
-            
-            guard let placemark = placemarks.first else { return "" }
-            
-            let administrativeArea = placemark.administrativeArea ?? ""
-            let locality = placemark.locality ?? ""
-            let subLocality = placemark.subLocality ?? ""
-            let thoroughfare = placemark.thoroughfare ?? ""
-            let subThoroughfare = placemark.subThoroughfare ?? ""
-            
-            return "\(administrativeArea)\(locality)\(subLocality)\(thoroughfare)\(subThoroughfare)"
-            
-        } catch {
-            print("位置情報の取得に失敗：\(error.localizedDescription)")
-            return ""
-        }
+    func setDestination(coordinates: CLLocationCoordinate2D) async {
+        destinationCoordinates = coordinates
+        destinationAddress = await coordinates.getLocationAddress()
     }
     
     @MainActor
@@ -89,26 +65,31 @@ class MainViewModel: ObservableObject {
     
     private func changeCameraPosition() {
         
-        guard var rect = route?.polyline.boundingMapRect else { return }
-        let paddingWidth = rect.size.width * 0.2
-        let paddingHeight = rect.size.height * 0.2
-        
-        rect.size.width += paddingWidth
-        rect.size.height += paddingHeight
-        
-        rect.origin.x -= paddingWidth / 2
-        rect.origin.y -= paddingHeight / 2
-        
-        mainCamera = .rect(rect)
+        switch userState {
+        case .confirmed:
+            guard var rect = route?.polyline.boundingMapRect else { return }
+            let paddingWidth = rect.size.width * Constants.paddingRatio
+            let paddingHeight = rect.size.height * Constants.paddingRatio
+            
+            rect.size.width += paddingWidth
+            rect.size.height += paddingHeight
+            
+            rect.origin.x -= paddingWidth / 2
+            rect.origin.y -= paddingHeight / 2
+            
+            mainCamera = .rect(rect)
+        default:
+            mainCamera = .userLocation(fallback: .automatic)
+        }
     }
     
     func reset() {
         userState = .setRidePoint
-        ridePointAddress = ""
+        ridePointAddress = nil
         ridePointCoordinates = nil
-        destinationAddress = ""
+        destinationAddress = nil
         destinationCoordinates = nil
         route = nil
-        mainCamera = .userLocation(fallback: .automatic)
+        changeCameraPosition()
     }
 }
