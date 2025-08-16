@@ -10,17 +10,9 @@ import CoreLocation
 import MapKit
 import SwiftUI
 
-enum UserState {
-    case setRidePoint
-    case searchLocation
-    case setDestination
-    case confirmed
-}
-
 class MainViewModel: ObservableObject {
-    
-    var userState: UserState = .setRidePoint
-    
+    @Published var currentUser = User.mock
+        
     @Published var showSearchView = false
 
     @Published var ridePointAddress: String?
@@ -31,6 +23,8 @@ class MainViewModel: ObservableObject {
     
     @Published var mainCamera: MapCameraPosition = .userLocation(fallback: .automatic)
     @Published var route: MKRoute?
+    
+    @Published var taxis: [Taxi] = Taxi.mocks
     
     @MainActor
     func setRideLocation(coordinates: CLLocationCoordinate2D) async {
@@ -65,7 +59,7 @@ class MainViewModel: ObservableObject {
     
     private func changeCameraPosition() {
         
-        switch userState {
+        switch currentUser.state {
         case .confirmed:
             guard var rect = route?.polyline.boundingMapRect else { return }
             let paddingWidth = rect.size.width * Constants.paddingRatio
@@ -84,7 +78,7 @@ class MainViewModel: ObservableObject {
     }
     
     func reset() {
-        userState = .setRidePoint
+        currentUser.state = .setRidePoint
         ridePointAddress = nil
         ridePointCoordinates = nil
         destinationAddress = nil

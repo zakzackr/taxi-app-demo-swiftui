@@ -22,8 +22,8 @@ struct MainView: View {
             information  
         }
         .sheet(isPresented: $mainViewModel.showSearchView) {
-            if mainViewModel.userState != .confirmed {
-                mainViewModel.userState = .setRidePoint
+            if mainViewModel.currentUser.state != .confirmed {
+                mainViewModel.currentUser.state = .setRidePoint
             }
         } content: {
             SearchView()
@@ -55,9 +55,16 @@ extension MainView {
                 MapPolyline(polyline)
                     .stroke(.blue, lineWidth: 7)
             }
+            
+            // Taxi location
+            ForEach(mainViewModel.taxis) { taxi in
+                Annotation(taxi.number, coordinate: taxi.coordinates) {
+                    Image(systemName: "car.circle.fill")
+                }
+            }
         }
         .overlay{
-            if mainViewModel.userState == .setRidePoint {
+            if mainViewModel.currentUser.state == .setRidePoint {
                 CenterPin()
             }
         }
@@ -65,7 +72,7 @@ extension MainView {
             CLLocationManager().requestWhenInUseAuthorization()
         }
         .onMapCameraChange(frequency: .onEnd) { context in
-            if mainViewModel.userState == .setRidePoint {
+            if mainViewModel.currentUser.state == .setRidePoint {
                 Task {
                     await mainViewModel.setRideLocation(coordinates: context.region.center)
                 }
@@ -104,7 +111,7 @@ extension MainView {
             Spacer()
             
             // Button
-            if mainViewModel.userState == .confirmed {
+            if mainViewModel.currentUser.state == .confirmed {
                 HStack(spacing: 16) {
                     Button {
                         mainViewModel.reset()
@@ -125,7 +132,7 @@ extension MainView {
                 
             } else {
                 Button {
-                    mainViewModel.userState = .searchLocation
+                    mainViewModel.currentUser.state = .searchLocation
                     mainViewModel.showSearchView.toggle()
                 } label: {
                     Text("目的地を指定する")
