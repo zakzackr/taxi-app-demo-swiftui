@@ -19,6 +19,7 @@ enum UserState {
     case searchLocation
     case setDestination
     case confirmed
+    case ordered
 }
 
 extension User {

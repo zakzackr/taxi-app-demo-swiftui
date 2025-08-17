@@ -26,6 +26,9 @@ class MainViewModel: ObservableObject {
     @Published var route: MKRoute?
     
     @Published var taxis: [Taxi] = []
+    var taxisListener: ListenerRegistration?
+    
+    @Published var selectedTaxi: Taxi?
     
     @MainActor
     func setRideLocation(coordinates: CLLocationCoordinate2D) async {
@@ -61,7 +64,7 @@ class MainViewModel: ObservableObject {
     func startTaxisListening() {
         let firestore = Firestore.firestore()
         
-        firestore.collection("taxis")
+        taxisListener = firestore.collection("taxis")
             .addSnapshotListener { querySnapshot, error in
                 if let error = error {
                     print("リスナーの取得に失敗しました: \(error.localizedDescription)")
@@ -100,6 +103,53 @@ class MainViewModel: ObservableObject {
             }
     }
     
+    func callATaxi() async {
+        guard let selectedTaxiId = await getSelectedTaxiId() else { return }
+        
+        do {
+            try await Firestore.firestore().collection("taxis").document(selectedTaxiId).updateData(["state": TaxiState.goingToRidePoint.rawValue])
+            
+            taxisListener?.remove()
+            
+            Firestore.firestore().collection("taxis").document(selectedTaxiId).addSnapshotListener { documentSnapshot, error in
+                if let error {
+                    print("配車するタクシーのリスナーの取得に失敗しました: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let snapshot = documentSnapshot else {
+                    print("配車するタクシーのリスナーデータが取得できませんでした")
+                    return
+                }
+                
+                do {
+                    let taxi = try snapshot.data(as: Taxi.self)
+                    self.selectedTaxi = taxi
+                } catch {
+                    print("配車するタクシーのデータ変換に失敗しました: \(error.localizedDescription)")
+                }
+                
+                
+            }
+        } catch {
+            print("タクシーデータの更新に失敗: \(error.localizedDescription)")
+        }
+        
+    }
+    
+    func reset() {
+        currentUser.state = .setRidePoint
+        ridePointAddress = nil
+        ridePointCoordinates = nil
+        destinationAddress = nil
+        destinationCoordinates = nil
+        route = nil
+        changeCameraPosition()
+    }
+}
+
+extension MainViewModel {
+    
     private func changeCameraPosition() {
         
         switch currentUser.state {
@@ -120,29 +170,46 @@ class MainViewModel: ObservableObject {
         }
     }
     
-//    @MainActor
-//    func fetchTaxis() async {
-//        let firestore = Firestore.firestore()
-//        
-//        do {
-//            let snapshot = try await firestore.collection("taxis").getDocuments()
-//            
-//            for document in snapshot.documents {
-//                let taxi = try document.data(as: Taxi.self)
-//                taxis.append(taxi)
-//            }
-//        } catch {
-//            print("Taxiデータの取得に失敗しました：\(error.localizedDescription)")
-//        }
-//    }
+    private func fetchTaxis() async -> [Taxi]? {
+        let firestore = Firestore.firestore()
+        
+        do {
+            let snapshot = try await firestore.collection("taxis").getDocuments()
+            var tempTaxis: [Taxi] = []
+            
+            for document in snapshot.documents {
+                let taxi = try document.data(as: Taxi.self)
+                tempTaxis.append(taxi)
+            }
+            
+            return tempTaxis
+        } catch {
+            print("Taxiデータの取得に失敗しました：\(error.localizedDescription)")
+            return nil
+        }
+    }
     
-    func reset() {
-        currentUser.state = .setRidePoint
-        ridePointAddress = nil
-        ridePointCoordinates = nil
-        destinationAddress = nil
-        destinationCoordinates = nil
-        route = nil
-        changeCameraPosition()
+    private func getSelectedTaxiId() async -> String? {
+        guard let allTaxis = await fetchTaxis(),
+              let ridePointCoordinates = ridePointCoordinates
+        else { return nil}
+        
+        let rideLocation = CLLocation(latitude: ridePointCoordinates.latitude, longitude: ridePointCoordinates.longitude)
+        var minDistance: CLLocationDistance = .infinity
+        var selectedTaxiId: String?
+        
+        for taxi in allTaxis {
+            guard taxi.state == .empty else { continue }
+            
+            let taxiLocation = CLLocation(latitude: taxi.coordinates.latitude, longitude: taxi.coordinates.longitude)
+            let distance = rideLocation.distance(from: taxiLocation)
+            
+            if distance < minDistance {
+                minDistance = distance
+                selectedTaxiId = taxi.id
+            }
+        }
+        
+        return selectedTaxiId
     }
 }

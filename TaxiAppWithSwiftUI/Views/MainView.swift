@@ -43,23 +43,44 @@ extension MainView {
             // User's current location
             UserAnnotation()
             
-            // Ride Point and Destination
-            if let ridePoint = mainViewModel.ridePointCoordinates,
-               let destination = mainViewModel.destinationCoordinates{
-                Marker("乗車地", coordinate: ridePoint).tint(.blue)
-                Marker("目的地", coordinate: destination).tint(.blue)
-            }
-            
-            // Route polyline
-            if let polyline = mainViewModel.route?.polyline {
-                MapPolyline(polyline)
-                    .stroke(.blue, lineWidth: 7)
-            }
-            
             // Taxi location
-            ForEach(mainViewModel.taxis) { taxi in
-                Annotation(taxi.number, coordinate: taxi.coordinates) {
-                    Image(systemName: "car.circle.fill")
+            if mainViewModel.currentUser.state == .setRidePoint {
+                ForEach(mainViewModel.taxis) { taxi in
+                    if taxi.state == .empty {
+                        Annotation(taxi.number, coordinate: taxi.coordinates) {
+                            Image(systemName: "car.circle.fill")
+                        }
+                    }
+                }
+            }
+            
+            if mainViewModel.currentUser.state == .confirmed ||
+                mainViewModel.currentUser.state == .ordered
+            {
+                // Ride Point and Destination
+                if let ridePoint = mainViewModel.ridePointCoordinates,
+                   let destination = mainViewModel.destinationCoordinates{
+                    Marker("乗車地", coordinate: ridePoint).tint(.blue)
+                    Marker("目的地", coordinate: destination).tint(.blue)
+                }
+            }
+            
+            if mainViewModel.currentUser.state == .confirmed {
+                // Route polyline
+                if let polyline = mainViewModel.route?.polyline {
+                    MapPolyline(polyline)
+                        .stroke(.blue, lineWidth: 7)
+                }
+            }
+            
+            if mainViewModel.currentUser.state == .ordered {
+                // Selected Taxi
+                if let taxi = mainViewModel.selectedTaxi {
+                    Annotation(taxi.number, coordinate: taxi.coordinates) {
+                        Image(systemName: "car.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.main)
+                    }
                 }
             }
         }
@@ -111,8 +132,10 @@ extension MainView {
             
             Spacer()
             
-            // Button
-            if mainViewModel.currentUser.state == .confirmed {
+            // Button or Status
+            if mainViewModel.currentUser.state == .ordered {
+                Status()
+            } else if mainViewModel.currentUser.state == .confirmed {
                 HStack(spacing: 16) {
                     Button {
                         mainViewModel.reset()
@@ -123,7 +146,10 @@ extension MainView {
                     }
                     
                     Button {
-                        
+                        mainViewModel.currentUser.state = .ordered
+                        Task {
+                            await mainViewModel.callATaxi()
+                        }
                     }
                     label: {
                         Text("タクシーを呼ぶ")
