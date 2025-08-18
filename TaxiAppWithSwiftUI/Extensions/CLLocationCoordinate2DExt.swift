@@ -10,6 +10,20 @@ import MapKit
 
 extension CLLocationCoordinate2D {
     
+    func getRegionTo(_ to: Self) -> MKCoordinateRegion {
+        let minPoint = Self(
+            latitude: (self.latitude + to.latitude) / 2,
+            longitude: (self.longitude + to.longitude) / 2
+        )
+        
+        let span = MKCoordinateSpan(
+            latitudeDelta: abs(self.latitude - to.latitude) * Constants.cameraMargin,
+            longitudeDelta: abs(self.longitude - to.longitude) * Constants.cameraMargin
+        )
+        
+        return MKCoordinateRegion(center: minPoint, span: span)
+    }
+    
     func getLocationAddress() async -> String {
         let geoCoder = CLGeocoder()
                 

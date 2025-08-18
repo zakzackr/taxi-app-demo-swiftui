@@ -23,6 +23,24 @@ struct Taxi {
 enum TaxiState: String, Decodable {
     case empty
     case goingToRidePoint
+    case arrivedAtRidePoint
+    case gointToDestination
+    case arrivedAtDestination
+    
+    var message: String {
+        switch self {
+        case .empty:
+            "タクシーを手配しています"
+        case .goingToRidePoint:
+            "タクシーの到着をお待ちください"
+        case .arrivedAtRidePoint:
+            "タクシーが乗車地に到着しました"
+        case .gointToDestination:
+            "目的地に向かっています"
+        case .arrivedAtDestination:
+            "目的地に到着しました"
+        }
+    }
 }
 
 extension Taxi: Identifiable, Decodable {

@@ -29,6 +29,25 @@ struct MainView: View {
             SearchView()
                 .environmentObject(mainViewModel)
         }
+        .alert("確認", isPresented: $mainViewModel.showAlertAtRidePoint) {
+            Button("OK") {
+                Task {
+                    await mainViewModel.updateTaxiState(id: mainViewModel.selectedTaxi?.id, state: .gointToDestination)
+                }
+            }
+        } message: {
+            Text("タクシーが乗車地に到着しました")
+        }
+        .alert("確認", isPresented: $mainViewModel.showAlertAtDestination) {
+            Button("OK") {
+                Task {
+                    await mainViewModel.updateTaxiState(id: mainViewModel.selectedTaxi?.id, state: .empty)
+                    mainViewModel.reset()
+                }
+            }
+        } message: {
+            Text("タクシーが目的地に到着しました")
+        }
     }
 }
 
@@ -91,7 +110,7 @@ extension MainView {
         }
         .onAppear{
             CLLocationManager().requestWhenInUseAuthorization()
-            mainViewModel.startTaxisListening()
+            mainViewModel.listeningForAllTaxis()
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             if mainViewModel.currentUser.state == .setRidePoint {
@@ -100,6 +119,7 @@ extension MainView {
                 }
             }
         }
+        .animation(.default, value: mainViewModel.mainCamera)
     }
     
     private var information: some View {
@@ -134,7 +154,9 @@ extension MainView {
             
             // Button or Status
             if mainViewModel.currentUser.state == .ordered {
-                Status()
+                if let state = mainViewModel.selectedTaxi?.state {
+                    Status(state: state)
+                }
             } else if mainViewModel.currentUser.state == .confirmed {
                 HStack(spacing: 16) {
                     Button {

@@ -8,27 +8,50 @@
 import SwiftUI
 
 struct Status: View {
+    let state: TaxiState
+    
     var body: some View {
         VStack {
             // Status bar
             HStack {
-                imageAndText(imageName: "figure.wave.circle", text: "手配")
+                imageAndText(
+                    imageName: state == .empty ? "figure.wave.circle": "checkmark.circle.fill",
+                    text: "手配"
+                )
                 
                 Spacer()
-                bar
+                if state == .empty {
+                    bar(progress: .notStarted)
+                } else if state == .goingToRidePoint {
+                    bar(progress: .middle)
+                } else {
+                    bar(progress: .arrived)
+                }
                 Spacer()
 
-                imageAndText(imageName: "car.circle", text: "乗車")
+                imageAndText(
+                    imageName: state == .empty || state == .goingToRidePoint ?  "car.circle": "checkmark.circle.fill",
+                    text: "乗車"
+                )
                 
                 Spacer()
-                bar
+                if state == .gointToDestination {
+                    bar(progress: .middle)
+                } else if state == .arrivedAtDestination {
+                    bar(progress: .arrived)
+                } else {
+                    bar(progress: .notStarted)
+                }
                 Spacer()
 
-                imageAndText(imageName: "checkmark.circle", text: "到着")
+                imageAndText(
+                    imageName: state == .arrivedAtDestination ? "checkmark.circle.fill": "checkmark.circle",
+                    text: "到着"
+                )
             }
             
             // Message
-            Text("タクシーを手配しています")
+            Text(state.message)
                 .font(.headline)
         }
         .foregroundStyle(.main)
@@ -36,7 +59,11 @@ struct Status: View {
 }
 
 #Preview {
-    Status()
+    Status(state: .empty)
+}
+
+enum Progress {
+    case notStarted, middle, arrived
 }
 
 extension Status {
@@ -50,14 +77,14 @@ extension Status {
         }
     }
     
-    private var bar: some View {
+    private func bar(progress: Progress) -> some View {
         HStack(spacing: 0) {
             Rectangle()
                 .frame(width: 50, height: 4)
-                .opacity(0.2)
+                .opacity(progress == .notStarted ? 0.2 : 1.0)
             Rectangle()
                 .frame(width: 50, height: 4)
-                .opacity(0.2)
+                .opacity(progress == .arrived ? 1.0 : 0.2)
         }
     }
 }

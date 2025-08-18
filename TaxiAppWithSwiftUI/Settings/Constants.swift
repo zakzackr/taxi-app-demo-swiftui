@@ -18,4 +18,6 @@ struct Constants {
     static let cameraDistance: Double = 1000
     
     static let pinHeight: CGFloat = 40
+    static let cameraMargin: CGFloat = 1.25
+    static let meterOfRange: Double = 10.0
 }
